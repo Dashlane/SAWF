@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Semantically annotated forms 1.0</title>
+    <link type="text/css" rel="stylesheet" href="default.css">
+    <style>/* style-md-lists */
+
+/* This is a weird hack for me not yet following the commonmark spec
+   regarding paragraph and lists. */
+[data-md] > :first-child {
+    margin-top: 0;
+}
+[data-md] > :last-child {
+    margin-bottom: 0;
+}</style>
+    <style>/* style-counters */
+
+body {
+    counter-reset: example figure issue defCounter;
+}
+.issue {
+    counter-increment: issue;
+}
+.issue:not(.no-marker)::before {
+    content: "Issue " counter(issue);
+}
+
+.example {
+    counter-increment: example;
+}
+.example:not(.no-marker)::before {
+    content: "Example " counter(example);
+}
+.invalid.example:not(.no-marker)::before,
+.illegal.example:not(.no-marker)::before {
+    content: "Invalid Example" counter(example);
+}
+
+figcaption {
+    counter-increment: figure;
+}
+figcaption:not(.no-marker)::before {
+    content: "Figure " counter(figure) " ";
+}</style>
+    <style>/* style-dfn-panel */
+
+.dfn-panel {
+    position: absolute;
+    z-index: 35;
+    height: auto;
+    width: -webkit-fit-content;
+    width: fit-content;
+    max-width: 300px;
+    max-height: 500px;
+    overflow: auto;
+    padding: 0.5em 0.75em;
+    font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
+    background: #DDDDDD;
+    color: black;
+    border: outset 0.2em;
+}
+.dfn-panel:not(.on) { display: none; }
+.dfn-panel * { margin: 0; padding: 0; text-indent: 0; }
+.dfn-panel > b { display: block; }
+.dfn-panel a { color: black; }
+.dfn-panel a:not(:hover) { text-decoration: none !important; border-bottom: none !important; }
+.dfn-panel > b + b { margin-top: 0.25em; }
+.dfn-panel ul { padding: 0; }
+.dfn-panel li { list-style: inside; }
+.dfn-panel.activated {
+    display: inline-block;
+    position: fixed;
+    left: .5em;
+    bottom: 2em;
+    margin: 0 auto;
+    max-width: calc(100vw - 1.5em - .4em - .5em);
+    max-height: 30vh;
+}
+
+.dfn-paneled { cursor: pointer; }
+</style> <style>/* style-selflinks */
+
+.heading, .issue, .note, .example, li, dt {
+    position: relative;
+}
+a.self-link {
+    position: absolute;
+    top: 0;
+    left: calc(-1 * (3.5rem - 26px));
+    width: calc(3.5rem - 26px);
+    height: 2em;
+    text-align: center;
+    border: none;
+    transition: opacity .2s;
+    opacity: .5;
+}
+a.self-link:hover {
+    opacity: 1;
+}
+.heading > a.self-link {
+    font-size: 83%;
+}
+li > a.self-link {
+    left: calc(-1 * (3.5rem - 26px) - 2em);
+}
+dfn > a.self-link {
+    top: auto;
+    left: auto;
+    opacity: 0;
+    width: 1.5em;
+    height: 1.5em;
+    background: gray;
+    color: white;
+    font-style: normal;
+    transition: opacity .2s, background-color .2s, color .2s;
+}
+dfn:hover > a.self-link {
+    opacity: 1;
+}
+dfn > a.self-link:hover {
+    color: black;
+}
+
+a.self-link::before            { content: "¶"; }
+.heading > a.self-link::before { content: "§"; }
+dfn > a.self-link::before      { content: "#"; }</style>
+    <style>/* style-autolinks */
+
+.css.css, .property.property, .descriptor.descriptor {
+    color: #005a9c;
+    font-size: inherit;
+    font-family: inherit;
+}
+.css::before, .property::before, .descriptor::before {
+    content: "‘";
+}
+.css::after, .property::after, .descriptor::after {
+    content: "’";
+}
+.property, .descriptor {
+    /* Don't wrap property and descriptor names */
+    white-space: nowrap;
+}
+.type { /* CSS value <type> */
+    font-style: italic;
+}
+pre .property::before, pre .property::after {
+    content: "";
+}
+[data-link-type="property"]::before,
+[data-link-type="propdesc"]::before,
+[data-link-type="descriptor"]::before,
+[data-link-type="value"]::before,
+[data-link-type="function"]::before,
+[data-link-type="at-rule"]::before,
+[data-link-type="selector"]::before,
+[data-link-type="maybe"]::before {
+    content: "‘";
+}
+[data-link-type="property"]::after,
+[data-link-type="propdesc"]::after,
+[data-link-type="descriptor"]::after,
+[data-link-type="value"]::after,
+[data-link-type="function"]::after,
+[data-link-type="at-rule"]::after,
+[data-link-type="selector"]::after,
+[data-link-type="maybe"]::after {
+    content: "’";
+}
+
+[data-link-type].production::before,
+[data-link-type].production::after,
+.prod [data-link-type]::before,
+.prod [data-link-type]::after {
+    content: "";
+}
+
+[data-link-type=element],
+[data-link-type=element-attr] {
+    font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    font-size: .9em;
+}
+[data-link-type=element]::before { content: "<" }
+[data-link-type=element]::after  { content: ">" }
+
+[data-link-type=biblio] {
+    white-space: pre;
+}</style>
+    <style>
+.def > h4 {
+  margin-top: 1em;
+  counter-increment: defCounter;
+}
+
+.def > h4::before {
+  content: "Guideline " counter(defCounter, decimal) ". ";
+}
+
+table.light {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table.light td {
+  text-align: center;
+}
+
+.figure {
+  width: 50%;
+  height: auto;
+  margin: 10px ! important;
+}
+</style> </head>
+  <body>
+    <div class="head">
+      <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img
+            alt="Dashlane" src="./dash-logo-animate-once.gif" width="33" height="44">
+        </a> </p>
+      <h1 class="p-name no-ref" id="title">Semantically Annotated Web Forms</h1>
+      <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">12
+          February<time class="dt-updated" datetime="2020-03-18"> 2021</time></span></h2>
+      <details open="">
+        <summary>Specification Metadata</summary>
+        <div data-fill-with="spec-metadata">
+          <dl>
+            <dt>This version: </dt>
+            <dd><a href="https://dashlane.github.io/SAWF/">https://dashlane.github.io/SAWF/</a></dd>
+            <dt class="author">Author: </dt>
+            <dd class="author p-author h-card vcard"><span class="p-name fn">Daniel
+                Glazman (Dashlane)</span></dd>
+            <dt>Source:</dt>
+            <dd><a href="https://github.com/Dashlane/SAWF">https://github.com/Dashlane/SAWF</a></dd>
+            <dt>Issue Tracking:</dt>
+            <dd><a href="https://github.com/Dashlane/SAWF/issue">https://github.com/Dashlane/SAWF/issues</a></dd>
+          </dl>
+        </div>
+      </details>
+      <div data-fill-with="warning"></div>
+      <p class="copyright" data-fill-with="copyright">Copyright © 2021 Dashlane.
+        Licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">CC
+          BY 4.0 License.</a></p>
+      <hr title="Separator for header"> </div>
+    <div class="p-summary" data-fill-with="abstract">
+      <h2 class="no-num no-toc no-ref heading settled" id="abstract"><a id="mozTocId190481"
+          class="mozTocH2"></a><span class="content">Abstract</span></h2>
+      <p><a href="https://www.dashlane.com/">Dashlane</a> is an application that
+        aims at fixing the UX of the Internet. On the Web, it must interact with
+        Web pages to detect and recognize the forms included in Web pages.This
+        document contains a set of guidelines for Web authors to help Dashlane -
+        and the whole ecosystem of browser Web Extensions with it - interact
+        better with their Web site.</p>
+    </div>
+    <h2 class="no-num no-toc no-ref heading settled" id="status"><a id="mozTocId392073"
+        class="mozTocH2"></a><span class="content">Status of this document</span></h2>
+    <div data-fill-with="status">
+      <p><a href="https://www.dashlane.com/">Dashlane</a> authored the present
+        document of "Best Practices" thinking at the whole industry of Web
+        Extensions interacting with a Web page, <u><strong>including</strong></u>
+        our competitors. Please follow the link "Issue Tracking" in the header
+        of this document to submit feedback.</p>
+    </div>
+    <nav data-fill-with="table-of-contents" id="toc">
+      <h2 class="no-num no-toc no-ref" id="contents"><a id="mozTocId804972" class="mozTocH2"></a>Table
+        of Contents</h2>
+      <ul id="mozToc">
+        <!--mozToc h2 1 h3 2-->
+        <li><a href="#mozTocId190481">Abstract</a></li>
+        <li><a href="#mozTocId392073">Status of this document</a></li>
+        <li><a href="#mozTocId162385">1. Forms</a>
+          <ul>
+            <li><a href="#mozTocId312604">1.1. The form element</a></li>
+            <li><a href="#mozTocId70917">1.2. The data-form-type attribute for
+                form elements</a></li>
+            <li><a href="#mozTocId902224">1.3. The data-form-type attribute for
+                form field elements</a></li>
+          </ul>
+        </li>
+        <li><a href="#mozTocId985957">A. References</a>
+          <ul>
+            <li><a href="#mozTocId856844">A.1. Normative references</a></li>
+            <li><a href="#mozTocId710169">A.2. Informative references</a></li>
+          </ul>
+        </li>
+      </ul>
+      <p><br>
+      </p>
+    </nav>
+    <main>
+      <h2 class="heading settled" data-level="1" id="forms"><a id="mozTocId162385"
+          class="mozTocH2"></a><span class="secno">1.</span> Forms</h2>
+      <h3 class="heading settled" data-level="2" id="the-form-element"><a id="mozTocId312604"
+          class="mozTocH3"></a><span class="secno">1.1.</span> The form element</h3>
+      <p>There are, semantically speaking, many types of forms on the Web. Here
+        is a short list of different forms a user hits on a daily basis:</p>
+      <ul>
+        <li>Search</li>
+        <li>Log in</li>
+        <li>Register</li>
+        <li>Order</li>
+        <li>Shopping basket</li>
+        <li>Pay</li>
+        <li>Reset my password</li>
+        <li>Contact and feedback</li>
+        <li>Newsletter subscription</li>
+        <li>etc.</li>
+      </ul>
+      <p>Most of these forms do materialize as a <a href="https://html.spec.whatwg.org/multipage/forms.html#the-form-element"><code>&lt;form&gt;</code></a>
+        element in the markup of their Web page host but not always.</p>
+      <div class="def">
+        <h4 class="no-num no-toc no-ref heading settled"><a id="mozTocId121159"
+            class="mozTocH4"></a>Avoid, unless absolutely necessary, form field
+          elements having no enclosing <a href="https://html.spec.whatwg.org/multipage/forms.html#the-form-element"><code>&lt;form&gt;</code></a>
+          elements.</h4>
+        <p>Detection of the typology of a form requires, if there is no
+          enclosing <a href="https://html.spec.whatwg.org/multipage/forms.html#the-form-element"><code>&lt;form&gt;</code></a>
+          element, to find the deepest common ancestor of geographically
+          aggregated form field elements and to use it as a form. This is
+          expensive, error-prone, and too often semantically wrong.</p>
+      </div>
+      <h3 class="heading settled" data-level="2" id="data-form-type-attribute-for-forms"><a
+          id="mozTocId70917" class="mozTocH3"></a><span class="secno">1.2.</span>
+        The data-form-type attribute for form elements</h3>
+      <p>A number of <a data-link-type="biblio" href="#biblio-html">[html]</a>
+        or <a href="#biblio-wai-aria-11">[WAI-ARIA-1.1]</a> attributes carried
+        by <code>&lt;form&gt;</code> elements can hold human- or
+        machine-readable information that go beyond purely programmatic or
+        stylistic data. For instance:</p>
+      <ul>
+        <li><code>name</code></li>
+        <li><code>id</code></li>
+        <li><code>title</code></li>
+        <li><code>action</code></li>
+        <li><code>aria-label</code></li>
+        <li>etc.</li>
+      </ul>
+      <p>To determine the type, semantically speaking, of a given Web form, a
+        code (for instance living inside a <a href="#biblio-webextensions">[WebExtension]</a>)
+        has no other choice than trying to read and <em>understand</em> these
+        arbitrary human- or machine-readable data. This is doable but remains
+        extremely expensive, error-prone and, all in all, an educated guess.</p>
+      <p></p>
+      <p>We are then suggesting a new attribute compatible with the <a data-link-type="biblio"
+href="#biblio-html">[html]</a> specification: the <code>data-form-type</code>
+        attribute.</p>
+      <div class="def">
+        <h4><a id="mozTocId864427" class="mozTocH4"></a>Add a <code>data-form-type</code>
+          attribute to all your forms</h4>
+        <p>The <code>data-form-type</code> attribute carries type information
+          about the form carrying the attribute. It is an unordered list of
+          comma-separated case-insensitive values. Its default value is "<code>other</code>".
+          The valid values for this attribute are:</p>
+        <ul>
+          <li><a href="#data-form-type-attribute-billing-value"><code>billing</code></a></li>
+          <li><a href="#data-form-type-attribute-change-password-value"><span style="color: #034575;"><span
+                  style="font-family: Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,Monaco,monospace;">change_password</span></span></a></li>
+          <li><a href="#data-form-type-attribute-contact-value"><code>contact</code></a></li>
+          <li><a href="#data-form-type-attribute-forgot-password-value"><code>forgot_password</code></a></li>
+          <li><a href="#data-form-type-attribute-identity-value"><span style="color: #034575;"><span
+                  style="font-family: Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,Monaco,monospace;">identity</span></span></a></li>
+          <li><a href="#data-form-type-attribute-login-value"><code>login</code></a></li>
+          <li><a href="#data-form-type-attribute-newsletter-value"><code>newsletter</code></a></li>
+          <li><a href="#data-form-type-attribute-other-value"><code>other</code></a><br>
+          </li>
+          <li><a href="#data-form-type-attribute-payment-value"><code>payment</code></a></li>
+          <li><a href="#data-form-type-attribute-register-value"><code>register</code></a></li>
+          <li><a href="#data-form-type-attribute-search-value"><code>search</code></a></li>
+          <li><a href="#data-form-type-attribute-shopping-basket-value"><span style="color: #034575;"><span
+                  style="font-family: Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,Monaco,monospace;">shopping_basket</span></span></a></li>
+          <li><a href="#data-form-type-attribute-shipping-value"><code>shipping</code></a></li>
+        </ul>
+        <p>Additionnally, the <a href="#data-form-type-attribute-step-value"><code>step</code></a>
+          value should be added to the <code>data-form-type</code> attribute if
+          the current form is only one step in a multi-form unique process, and
+          the <a href="#data-form-type-attribute-final-value"><code>final</code></a>
+          value should be added alongside the <code>step</code> value if the
+          current form is the last step in a multi-form unique process.</p>
+      </div>
+      <p>The <a id="data-form-type-attribute-billing-value"><strong><code>billing</code></strong></a>
+        value represents a form allowing the user to enter a billing address.</p>
+      <p>The <a id="data-form-type-attribute-change-password-value"><strong><code>change_password</code></strong></a>
+        value represents a form allowing the user to change his/her credentials
+        for the current Web page/Web site.</p>
+      <p>The <a id="data-form-type-attribute-contact-value"><strong><code>contact</code></strong></a>
+        value represents a form allowing to contact the editors of a Web
+        page/Web site and/or provide feedback.</p>
+      <p>The <a id="data-form-type-attribute-final-value"><strong><code>final</code></strong></a>
+        extra value should be added to other values if the current form is the
+        last step in a multi-form process where all forms have the same <code>data-form-type</code>&nbsp;
+        (except <code>final</code> value).</p>
+      <p>The <a id="data-form-type-attribute-forgot-password-value"><strong><code>forgot_password</code></strong></a>
+        value represents a form allowing a user to retrieve his/her current
+        credentials for the current Web page/Web site.</p>
+      <p>The <a id="data-form-type-attribute-identity-value"><strong><code>identity</code></strong></a>
+        value represents a form allowing a user to provide identity details (ID,
+        passport or more general information like name, birthdate, etc) outside
+        of another form type (eg. <code>register</code> or <code>contact</code>)
+        to the current Web page/Web form.</p>
+      <p>The <a id="data-form-type-attribute-login-value"><strong><code>login</code></strong></a>
+        value represents a form allowing a user to authenticate himself/herself
+        on a given Web page/Web site, providng credentials.</p>
+      <p>The <a id="data-form-type-attribute-newsletter-value"><strong><code>newsletter</code></strong></a>
+        value represents a form allowing a user to suscribe to or unsubscribe
+        from a newsletter sent by email.</p>
+      <p>The <a id="data-form-type-attribute-other-value"><strong><code>other</code></strong></a>
+        value is used when no other value of the <code>data-form-type</code>
+        attribute can accurately represent the form.</p>
+      <p>The <a id="data-form-type-attribute-payment-value"><strong><code>payment</code></strong></a>
+        value represents a form allowing a user to enter payment information
+        (credit card, IBAN, etc.).</p>
+      <p>The <a id="data-form-type-attribute-register-value"><strong><code>register</code></strong></a>
+        value represents a form allowing a user to create an account on a given
+        Web page/Web site.</p>
+      <p>The <a id="data-form-type-attribute-search-value"><strong><code>search</code></strong></a>
+        value represents a search form, basic or advanced.</p>
+      <p>The <a id="data-form-type-attribute-shipping-value"><strong><code>shipping</code></strong></a>
+        value epresents a form allowing the user to enter a shipping address.</p>
+      <p>The <a id="data-form-type-attribute-shopping-basket-value"><strong><code>shopping_basket</code></strong></a>
+        value represents a form allowing a user to visualize the current
+        contents of his/her shopping basket.</p>
+      <p>The <a id="data-form-type-attribute-step-value"><strong><code>step</code></strong></a>
+        extra value should be added to other values if the current form is only
+        one step in a multi-form process where all forms have the same <code>
+          data-form-type</code>&nbsp; (except <code>final</code> value).</p>
+      <div class="example">
+        <p>The following real-life form should carry <code>data-form-type="login"</code></p>
+        <img src="walmart_login.png" alt="login form at walmart.com" class="figure"></div>
+      <div class="example">
+        <p> The following real-life form should carry <code>data-form-type="login,step"</code></p>
+        <img src="google_login.png" alt="login form at google.com" class="figure"></div>
+      <div class="example">
+        <p> The following real-life form should carry <code>data-form-type="search"</code></p>
+        <img src="airfrance_login.png" alt="login form at airfrance.com" class="figure"></div>
+      <h3 class="heading settled" data-level="2" id="data-form-type-attribute-for-other-elements"><a
+          id="mozTocId902224" class="mozTocH3"></a><span class="secno">1.3.</span>
+        The data-form-type attribute for form field elements</h3>
+      <p>Similarly, it can be extremely difficult to detect the type,
+        semantically speaking, of a given for field like a <code>&lt;input&gt;</code>
+        or <code>&lt;button&gt;</code> element contained in a form. Let's take
+        some real-life examples.</p>
+      <div class="example">
+        <p>Most Web sites implement the Show/Hide buttons inside password fields
+          in two different ways:</p>
+        <ol>
+          <li>the <code>type</code> attribute of the <code>&lt;input&gt;</code>
+            element switches from "<code>password</code>" to "<code>text</code>"
+            and back,</li>
+          <li>a deck of two strictly overlapping <code>&lt;input&gt;</code>
+            elements, one with <code>type="password"</code> and the other with
+            <code>type="text"</code>, sharing the same value; the Web page shows
+            only the one corresponding to the user's request.</li>
+        </ol>
+        <p>In both cases, it can be extremely complex for a code to understand
+          that an <code>&lt;input type="text""&gt;</code> element is indeed a
+          password field if nothing in its context (attributes, label, etc.)
+          indicates it.</p>
+      </div>
+      <div class="example">
+        <p>The French IRS's Web site has a login form that is pretty common for
+          such gouvernmental Web sites. The user must use an ID that is a "tax
+          number" or a fiscal reference to log in. Here is a screenshot and the
+          markup:</p>
+        <p><img src="impots_login.png" alt="impots.gouv.fr login" class="figure"></p>
+        <p><img src="impots_login_markup.png" alt="impots.gouv.fr login markup"
+            class="figure"></p>
+        <p> As you can see, it is pretty difficult to understand from the markup
+          of the form that the input field should host a user ID:</p>
+        <ul>
+          <li>the <code>type</code> attribute of the element indicates a
+            telephone number... That's a hack used by too many Web sites to show
+            the numeric keyboard on mobile devices. Another value of the <code>type</code>
+            attribute, the "<code>number</code>" value, could be used too but
+            unfortunately it often renders spinbuttons for +1 increase and -1
+            decrease alongside the input field.</li>
+          <li>the <code>&lt;label&gt;</code> for the input field reads "Numéro
+            fiscal" ("Tax ID" in english) but "Numéro" ("number" in english) is
+            consistent with the <code>type="tel</code>" carried by the input
+            element</li>
+          <li>the input element itself carries another conflicting piece of
+            information as an attribute <code>autocomplete="username"</code></li>
+        </ul>
+      </div>
+      <p>We are then proposing to reuse the <code>data-form-type</code>
+        attribute described above to provide client codes with semantic
+        information about the real usage of each form field element. </p>
+      <div class="def">
+        <h4><a id="mozTocId659633" class="mozTocH4"></a>Add a <code>data-form-type</code>
+          attribute to all your form field elements</h4>
+        <p>The <code>data-form-type</code> attribute carries type information
+          about the form field element carrying the attribute. It is an
+          unordered list of comma-separated case-insensitive values and extra
+          values. Its default value is "<code>other</code>".</p>
+        <p>The valid values for this attribute are the following ones (for each
+          item, the sublist defines the valid extra values for that value):</p>
+        <ul>
+          <li><a href="#data-form-type-field-value-action"><strong><code>action</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-action">Action</a> extra values</li>
+          </ul>
+          <li><strong><code><a href="#data-form-type-field-value-address">address</a></code></strong></li>
+          <ul>
+            <li><a href="#extra-values-location">Location</a> extra values</li>
+            <li><a href="#extra-values-code">Code</a> extra values</li>
+            <li><a href="#extra-values-id">ID</a> extra values</li>
+            <li><a href="#extra-values-payment">Payment</a> extra values</li>
+            <li><a href="#extra-values-location-type">Location type</a> extra
+              values</li>
+            <li><a href="#extra-values-partial">Partial</a> extra values</li>
+          </ul>
+          <li><strong><code><a href="#data-form-type-field-value-age">age</a></code></strong></li>
+          <li><strong><code><a href="#data-form-type-field-value-company">company</a></code></strong></li>
+          <ul>
+            <li><a href="#extra-values-company">Company</a> extra values</li>
+            <li><a href="#extra-values-title">Title</a> extra values</li>
+          </ul>
+          <li><strong><code><a href="#data-form-type-field-value-consent">consent</a></code></strong></li>
+          <ul>
+            <li><a href="#extra-values-consent">Consent</a> extra values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-date"><strong><code>date</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-date">Date</a> extra values</li>
+            <li><a href="#extra-values-id">ID</a> extra values</li>
+            <li><a href="#extra-values-payment">Payment</a> extra values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-email"><strong><code>email</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-repetition">Repetition</a> extra values</li>
+            <li><a href="#extra-values-email">Email</a> extra values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-id_document"><strong><code>id_document</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-id">ID</a> extra values</li>
+            <li><a href="#extra-values-partial">Partial</a> extra values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-name"><strong><code>name</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-name">Name</a> extra values</li>
+            <li><a href="#extra-values-id">ID</a> extra values</li>
+            <li><a href="#extra-values-title">Title</a> extra values</li>
+            <li><a href="#extra-values-payment">Payment</a> extra values</li>
+            <li><a href="#extra-values-location-type">Location type</a> extra
+              values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-other"><strong><code>other</code></strong></a></li>
+          <li><a href="#data-form-type-field-value-otp"><strong><code>otp</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-partial">Partial</a> extra values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-password"><strong><code>password</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-repetition">Repetition</a> extra values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-payment"><strong><code>payment</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-payment">Payment</a> extra values</li>
+            <li><a href="#extra-values-location-type">Location type</a> extra
+              values</li>
+            <li><a href="#extra-values-partial">Partial</a> extra values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-phone"><strong><code>phone</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-phone">Phone</a> extra values</li>
+            <li><a href="#extra-values-partial">Partial</a> extra values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-query"><strong><code>query</code></strong></a></li>
+          <ul>
+          </ul>
+          <li><a href="#data-form-type-field-value-title"><strong><code>title</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-title">Title</a> extra values</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-username"><strong><code>username</code></strong></a></li>
+          <ul>
+            <li><a href="#extra-values-repetition">Repetition</a> extra value</li>
+          </ul>
+          <li><a href="#data-form-type-field-value-website"><strong><code>website</code></strong></a></li>
+        </ul>
+        <p></p>
+      </div>
+      <h4 class="no-num no-toc no-ref">Values</h4>
+      <p>The <a id="data-form-type-field-value-action"><strong><code>action</code></strong></a>
+        value represents a form field or a link that serves as submission button
+        or UI element allowing to submit the form or move to the next part in
+        the form.</p>
+      <p>The <a id="data-form-type-field-value-address"><strong><code>address</code></strong></a>
+        value represents a form field element that can contain an physical or
+        postal address or a part of a physical or postal address.</p>
+      <p>The <a id="data-form-type-field-value-age"><strong><code>age</code></strong></a>
+        value represents a form field that can contain an age or define a range
+        of ages (eg. between 40 and 49 years old).</p>
+      <p>The <a id="data-form-type-field-value-company"><strong><code>company</code></strong></a>
+        value represents a form field that can contain information about a
+        company, corporation, professional organization, etc.</p>
+      <p>The <a id="data-form-type-field-value-consent"><strong><code>consent</code></strong></a>
+        value represents a form field that is either a consent about Terms,
+        Policies, etc. or a link to such documents.</p>
+      <p>The <a id="data-form-type-field-value-date"><code><strong>date</strong></code></a>
+        value represents a form field element that can contain a date or part of
+        a date.</p>
+      <p>The <a id="data-form-type-field-value-email"><strong><code>email</code></strong></a>
+        value represents a form field element that can contain an email address
+        or a part of an email address.</p>
+      <p>The <a id="data-form-type-field-value-id_document"><strong><code>id_document</code></strong></a>
+        value represents a form field element that can contain information about
+        an identity document such as an ID card, a passport, a driving license,
+        etc.</p>
+      <p>The <a id="data-form-type-field-value-name"><strong><code>name</code></strong></a>
+        value represents a form field element that can contain the name of an
+        individual or organization or a part of the name of an individual or
+        organization.</p>
+      <p>The <a id="data-form-type-field-value-other"><strong><code>other</code></strong></a>
+        value represents a form field element that cannot be classified using
+        another value. This is the default value for the atttribute.</p>
+      <p>The <a id="data-form-type-field-value-otp"><strong><code>otp</code></strong></a>
+        value represents a form field element that can contain a One-Time
+        Password, for instance an confirmation code the user receives on his
+        mobile phone.</p>
+      <p>The <a id="data-form-type-field-value-password"><strong><code>password</code></strong></a>
+        value represents a form field element that can contain a password or a
+        passphrase.</p>
+      <p>The <a id="data-form-type-field-value-payment"><strong><code>payment</code></strong></a>
+        value represents a form field element that can contain information about
+        a payment method like a bank account, a credit card or wire transfer
+        information.</p>
+      <p>The <a id="data-form-type-field-value-phone"><strong><code>phone</code></strong></a>
+        value represents a form field element that can contain a phone number of
+        a part of a phone number.</p>
+      <p>The <a id="data-form-type-field-value-query"><strong><code>query</code></strong></a>
+        value represents a form field element that can contain the subject of a
+        search request.</p>
+      <p>The <a id="data-form-type-field-value-title"><strong><code>title</code></strong></a>
+        value represents a form field element that can contain title or gender
+        information about an individual.</p>
+      <p>The <a id="data-form-type-field-value-username"><strong><code>username</code></strong></a>
+        value represents a form field element that contains a login name, a
+        pseudo, etc. used to authenticate a user on a website.</p>
+      <p>The <a id="data-form-type-field-value-website"><strong><code>website</code></strong></a>
+        values represents a form field element that can contain a URL.</p>
+      <h4 class="no-num no-toc no-ref">Extra values</h4>
+      <p><a id="extra-values-action">Action extra values</a></p>
+      <ul>
+        <li>the <strong><code>change_password</code></strong> extra value
+          represents a button or link that, when activated, allows users to
+          change their passwords</li>
+        <li>the <strong><code>forgot_login</code></strong> extra value
+          represents a button or link that, when activated, allows users to
+          retrieve the login part of their credentials.</li>
+        <li>the <strong><code>forgot_password</code></strong> extra value
+          represents a button or link that, when activated, allows users to
+          reset their passwords</li>
+        <li>the <strong><code>login</code></strong> extra value represents a
+          button or link that, when activated, allows users to authenticate
+          themselves</li>
+        <li>the <strong><code>logout</code></strong> extra value represents a
+          button or link that, when activated, allows users to log out from a
+          website</li>
+        <li>the <strong><code>my_account</code></strong> extra value represents
+          a button or link that, when activated, allows users to access their
+          account on a website</li>
+        <li>the <strong><code>next</code></strong> extra value represents a
+          button or link that, when activated, allows users to continue a
+          process across multiple consecutive forms</li>
+        <li>the <strong><code>register</code></strong> extra value represents a
+          button or link that, when activated, allows users to register/create
+          an account onto a website</li>
+        <li>the <code><strong>search</strong></code> extra value represents a
+          button or link that, when activated, sends a search query to the
+          server.</li>
+        <li>the <code><strong>subscribe</strong></code> extra value represents
+          a button or link that, when activated, allows users to subscribe to a
+          newsletter.</li>
+      </ul>
+      <h5><a id="extra-values-code">Code extra values</a></h5>
+      <ul>
+        <li>the <strong><code>code</code></strong> extra value represents an
+          access code like the activation code of a credit card or an access
+          code to a building</li>
+      </ul>
+      <h5><a id="extra-values-company">Company extra values</a></h5>
+      <ul>
+        <li>The <strong><code>company_name</code></strong> extra value
+          represents the full name of a company</li>
+      </ul>
+      <h5><a id="extra-values-consent">Consent extra values</a></h5>
+      <ul>
+        <li>the <strong><code>newsletter</code></strong> extra value represents
+          a form field element allowing the user to express consent or dissent
+          to receive a newsletter</li>
+        <li>the <strong><code>privacy_policy</code></strong> extra value
+          represents either a form field element allowing the user to express
+          consent or dissent to a Privacy Policy, or a link to such Privacy
+          Policy</li>
+        <li>the <code><strong>rememberme</strong></code> extra value represents
+          a form field allowing users to specify they want to keep their session
+          open and avoid future login steps</li>
+        <li>the <strong><code>terms</code></strong> extra value represents
+          either a form field element allowing the user to express consent or
+          dissent to legal documents like Terms of Services, or a link to such
+          documents</li>
+      </ul>
+      <h5><a id="extra-values-date">Date extra values</a></h5>
+      <ul>
+        <li>the <strong><code>birth</code></strong> extra value indicates the
+          information is relative to a birth date</li>
+        <li>the <strong><code>day</code></strong> extra value represents the
+          day part of a date</li>
+        <li>the <strong><code>expiration</code></strong> extra value indicates
+          the information is relative to an expiration date</li>
+        <li>the <strong><code>issue</code></strong> extra value indicates the
+          information is relative to a date of issue</li>
+        <li>the <strong><code>month</code></strong> extra value represents the
+          month part of a date</li>
+        <li>the <strong><code>year</code></strong> extra value represents the
+          year part of a date</li>
+      </ul>
+      <h5><a id="extra-values-email">Email extra values</a></h5>
+      <ul>
+        <li>the <strong><code>local_part</code></strong> extra value represents
+          the part of an email address that precedes the @ sign</li>
+        <li>the <strong><code>domain_part</code></strong> extra value
+          represents the part of an email address that follows the @ sign</li>
+      </ul>
+      <h5><a id="extra-values-id">ID extra values</a></h5>
+      <ul>
+        <li>the <strong><code>citizenship</code></strong> extra value
+          represents a citizenship</li>
+        <li>the <strong><code>drivers_license</code></strong> extra value
+          represents information about a Driver's License</li>
+        <li>the <strong><code>id_card</code></strong> extra value represents
+          information about an Identity/Citizenship Card</li>
+        <li>the <strong><code>passport</code></strong> extra value represents
+          information about a Passport</li>
+        <li>the <strong><code>ssn</code></strong> extra value represents
+          information about a Social Security Number</li>
+        <li>the <strong><code>tax</code></strong> extra value represents a tax
+          reference like an IRS number in the US or a "Numéro fiscal" in France</li>
+      </ul>
+      <h5><a id="extra-values-location">Location extra values</a></h5>
+      <ul>
+        <li>the <code><strong>address_name</strong></code> extra value
+          represents a user-defined name for a given address</li>
+        <li>the <strong><code>box</code></strong> extra value represents for
+          instance the PO Box of an address</li>
+        <li>the <strong><code>building</code></strong> extra value represents
+          the building part of an address</li>
+        <li>the <strong><code>city</code></strong> extra value represents the
+          name of a city or town</li>
+        <li>the <strong><code>country</code></strong> extra value represents
+          the name of a country in an address</li>
+        <li>the <strong><code>departement</code></strong> extra value
+          represents the name of code of a French "département" in an address in
+          France (see also region and state below)</li>
+        <li>the <strong><code>door</code></strong> extra value represents the
+          number a door or appartment in an address</li>
+        <li>the <strong><code>floor</code></strong> extra value represents the
+          floor part of an address</li>
+        <li>the <strong><code>region</code></strong> extra value represents the
+          name of a region in an address, for instance Île-de-France in France
+          or Sicily in Italy.</li>
+        <li>the <strong><code>stairway</code></strong> extra value represents
+          the identification of a stairway in an address</li>
+        <li>the <strong><code>street</code></strong> extra value represents
+          partial or total information about a street name in an address</li>
+        <li>the <strong><code>street_number</code></strong> extra value
+          represents the street number of an address</li>
+        <li>the <strong><code>street_type</code></strong> extra value
+          represents the type of the street (rue, boulevard, gata, driveway,
+          etc.)</li>
+        <li>the <strong><code>zip</code></strong> extra value represents the
+          zip or postal code of an address</li>
+      </ul>
+      <p><a id="extra-values-location-type">Location type extra values</a></p>
+      <ul>
+        <li>the <strong><code>billing</code></strong> extra value represents
+          information about a billing address</li>
+        <li>the <strong><code>shipping</code></strong> extra value represents
+          information about a shiping address</li>
+      </ul>
+      <h5><a id="extra-values-name">Name extra values</a></h5>
+      <ul>
+        <li>the <strong><code>first</code></strong> extra value represents the
+          first name part of a name</li>
+        <li>the <strong><code>last</code></strong> extra value represents the
+          last name part of a name</li>
+        <li>the <code><strong>maiden</strong></code> extra value represents a
+          secondary family name like a maiden name</li>
+        <li>the <strong><code>middle</code></strong> extra value represents the
+          middle name part of a name</li>
+        <li>the <strong><code>middle_initials</code></strong> extra value
+          represents the initials of the middle name part of a name</li>
+      </ul>
+      <h5><a id="extra-values-partial">Partial extra values</a></h5>
+      <ul>
+        <li>the <strong><code>part</code></strong> extra value indicates the
+          form field element contains only part of an information.</li>
+        <li>the <strong><code>extra</code></strong> extra value represents
+          extra information that complements other better classified information</li>
+      </ul>
+      <h5><a id="extra-values-payment">Payment extra values</a></h5>
+      <ul>
+        <li>the <strong><code>alias</code></strong> extra value represents a
+          user-defined name for a bank account; it's not part of the bank
+          account or payment information per se.</li>
+        <li>the <strong><code>bank_account</code></strong> extra value
+          represents information about a bank account</li>
+        <ul>
+          <li>use the secondary extra value <code><strong>part</strong></code>
+            to indicate the bank code part of a bank account number</li>
+          <li>use the secondary extra value <strong><code>number</code></strong>
+            to indicate the account number part of a bank account number</li>
+        </ul>
+        <li>the <strong><code>bank_name</code></strong> extra value represents
+          the human-readable name of the bank or financial organization holding
+          a bank account.</li>
+        <li>the <strong><code>bic</code></strong> extra value represents
+          information about the BIC part of a bank account identification</li>
+        <li>the <strong><code>credit_card</code></strong> extra value
+          represents information about a credit or debit card</li>
+        <li>the <strong><code>cvv</code></strong> extra value represents a
+          validation code like the CVV/CVV2 codes for credit cards or checksum
+          information for account numbers</li>
+        <li>the <strong><code>iban</code></strong> extra value represents
+          information about the IBAN part of a bank account identification</li>
+        <li>the <strong><code>swift</code></strong> extra value represents
+          information about the SWIFT part of a bank account identification</li>
+        <li>the <strong><code>type</code></strong> extra value represents the
+          type of some payment information, eg. Visa, Paypal, Wire Transfer,
+          etc.</li>
+      </ul>
+      <h5><a id="extra-values-phone">Phone extra values</a></h5>
+      <ul>
+        <li>the <strong><code>country</code></strong> extra value represents
+          the country code part of a phone number</li>
+        <li>the <strong><code>mobile</code></strong> extra value indicates a
+          phone number is a mobile phone number</li>
+        <li>the <strong><code>prefix</code></strong> extra value represents a
+          prefix, that is not a country code, composing a phone number</li>
+        <li>the <strong><code>type</code></strong> extra value represents a
+          form field that can contain the type of a phone number (mobile,
+          landline, fax, etc.)</li>
+        <li>the <strong><code>suffix</code></strong> extra value represents a
+          suffix composing a phone number</li>
+      </ul>
+      <h5><a id="extra-values-repetition">Repetition extra values</a></h5>
+      <ul>
+        <li>the <strong><code>confirmation</code></strong> extra value
+          represents a field that is present in the form to confirm the value of
+          another field</li>
+        <li>the <strong><code>new</code></strong> extra value represents new
+          user-defined data like a new password, a new address, etc.</li>
+        <li>the <strong><code>secondary</code></strong> extra value represents
+          extra user data that are to be used only if the form also contains the
+          similar primary user data</li>
+      </ul>
+      <h5><a id="extra-values-title">Title extra values</a></h5>
+      <ul>
+        <li>the <strong><code>job</code></strong> extra value indicates the
+          information is about a job title</li>
+        <li>the <strong><code>gender</code></strong> extra value indicates
+          gender information</li>
+      </ul>
+      <h4 class="no-num no-toc no-ref"><a id="mozTocId677767" class="mozTocH4"></a>Examples</h4>
+      <div class="example">
+        <p>Subscription page for the Washington Post in April 2020:</p>
+        <p><img src="washpo_register.png" alt="washington post register" class="figure"></p>
+        <p>On that page, the form should have a <code>data-form-type</code>
+          attribute set to "<code>register</code>".</p>
+        <p>The two radio buttons at the top don't need to be tagged with a <code>data-form-type</code>
+          since they don't belong to the form, markup-wise.</p>
+        <p>The first input field should have a <code>data-form-type</code>
+          attribute set to "<code>email</code>". The second should have the
+          attribute set to "<code>password</code>" and the third to "<code>password,confirmation</code>".</p>
+      </div>
+      <div class="example">
+        <p> MyFrys page for frys.com. </p>
+        <p><img src="frys.png" alt="MyFrys page at frys.com" class="figure"></p>
+        <p>On that page, there are two forms. The first one, on the left-hand
+          side of the screen should have a <code>data-form-type</code>
+          attribute set to "<code>login</code>". The second one, on the
+          right-hand side of the screen should have a <code>data-form-type</code>
+          attribute set to "<code>register</code>".</p>
+        <p>The attribute values for the various input fields should be:</p>
+        <table style="width: 100%" class="light" border="1">
+          <tbody>
+            <tr>
+              <td rowspan="1" colspan="2"><strong>Login form</strong></td>
+            </tr>
+            <tr>
+              <td>Email</td>
+              <td><code>email</code></td>
+            </tr>
+            <tr>
+              <td>Password</td>
+              <td><code>password</code></td>
+            </tr>
+            <tr>
+              <td>Checkbox</td>
+              <td><code>other</code></td>
+            </tr>
+            <tr>
+              <td>Button</td>
+              <td><code>action,login</code></td>
+            </tr>
+            <tr>
+              <td rowspan="1" colspan="2"><strong>Register form</strong></td>
+            </tr>
+            <tr>
+              <td>First name</td>
+              <td><code>name,first</code></td>
+            </tr>
+            <tr>
+              <td>Last name</td>
+              <td><code>name,last</code></td>
+            </tr>
+            <tr>
+              <td>Email address</td>
+              <td><code>email</code></td>
+            </tr>
+            <tr>
+              <td>Confirm email address</td>
+              <td><code>email,confirmation</code></td>
+            </tr>
+            <tr>
+              <td>Create password</td>
+              <td><code>password</code></td>
+            </tr>
+            <tr>
+              <td>Confirm password</td>
+              <td><code>password,confirmation</code></td>
+            </tr>
+            <tr>
+              <td>Zip code</td>
+              <td><code>address,zip</code></td>
+            </tr>
+            <tr>
+              <td>Checkbox</td>
+              <td><code>consent,newsletter</code></td>
+            </tr>
+            <tr>
+              <td>Button</td>
+              <td><code>action,register</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="example">
+        <p>Register form at darty.fr.</p>
+        <p><img src="darty_register.png.png" alt="register form at darty.fr" class="figure"></p>
+        <p>On that page, the form should have a <code>data-form-type</code>
+          attribute set to "<code>register</code>".</p>
+        <p>The attribute values for the various input fields should be:</p>
+        <table style="width: 100%" class="light" border="1">
+          <tbody>
+            <tr>
+              <td>Particulier</td>
+              <td><code>other</code></td>
+            </tr>
+            <tr>
+              <td>Professionnel</td>
+              <td><code>other</code></td>
+            </tr>
+            <tr>
+              <td>Mme.</td>
+              <td><code>title,gender</code></td>
+            </tr>
+            <tr>
+              <td>M.</td>
+              <td><code>title,gender</code></td>
+            </tr>
+            <tr>
+              <td>Nom</td>
+              <td><code>name,last</code></td>
+            </tr>
+            <tr>
+              <td>Prénom</td>
+              <td><code>name,first</code></td>
+            </tr>
+            <tr>
+              <td>Adresse email</td>
+              <td><code>email</code></td>
+            </tr>
+            <tr>
+              <td>Confirmer adresse email</td>
+              <td><code>email,confirmation</code></td>
+            </tr>
+            <tr>
+              <td>Mot de passe</td>
+              <td><code>password</code></td>
+            </tr>
+            <tr>
+              <td>Confirmer le mot de passe</td>
+              <td><code>password,confirmation</code></td>
+            </tr>
+            <tr>
+              <td>Date de naissance</td>
+              <td><code>date,birth</code></td>
+            </tr>
+            <tr>
+              <td>Téléphone (mobile)</td>
+              <td><code>phone,mobile</code></td>
+            </tr>
+            <tr>
+              <td>Téléphone (fixe)</td>
+              <td><code>phone</code></td>
+            </tr>
+            <tr>
+              <td>Adresse</td>
+              <td><code>address</code></td>
+            </tr>
+            <tr>
+              <td>Nom de la société, cedex...</td>
+              <td><code>address,extra</code></td>
+            </tr>
+            <tr>
+              <td>Bât.</td>
+              <td><code>address,building</code></td>
+            </tr>
+            <tr>
+              <td>Esc.</td>
+              <td><code>address,stairway</code></td>
+            </tr>
+            <tr>
+              <td>Étage</td>
+              <td><code>address,floor</code></td>
+            </tr>
+            <tr>
+              <td>Porte</td>
+              <td><code>address,door</code></td>
+            </tr>
+            <tr>
+              <td>Pays</td>
+              <td><code>address,country</code></td>
+            </tr>
+            <tr>
+              <td>Code postal</td>
+              <td><code>address,zip</code></td>
+            </tr>
+            <tr>
+              <td>Ville</td>
+              <td><code>address,city</code></td>
+            </tr>
+            <tr>
+              <td>Checkbox (SMS)</td>
+              <td><code>consent,newsletter</code></td>
+            </tr>
+            <tr>
+              <td>Checkbox (email)</td>
+              <td><code>consent,newsletter</code></td>
+            </tr>
+            <tr>
+              <td>Opt-out</td>
+              <td><code>consent,newsletter<br>
+                </code></td>
+            </tr>
+            <tr>
+              <td>Button</td>
+              <td><code>action,register</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="example">
+        <p>Login form at twitter.com.</p>
+        <p><img src="twitter_login.png" alt="login form at Twitter" class="figure"></p>
+        <p> <span style="color: rgb(0, 0, 0); font-family: sans-serif; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(252, 250, 238); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">On
+            that page, the form should have a<span>&nbsp;</span></span><code style="font-family: Menlo, Consolas, &quot;DejaVu Sans Mono&quot;, Monaco, monospace; font-size: 0.9em; hyphens: none; text-transform: none; text-align: start; font-variant: normal; orphans: 3; widows: 3; break-before: avoid; color: rgb(0, 0, 0); font-style: normal; font-weight: 400; letter-spacing: normal; text-indent: 0px; white-space: normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(252, 250, 238); text-decoration-style: initial; text-decoration-color: initial;">data-form-type</code><span
+            style="color: rgb(0, 0, 0); font-family: sans-serif; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(252, 250, 238); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;"><span>&nbsp;</span>attribute
+            set to "<code>login</code>".</span></p>
+        <p>In this form, the first field should have a <code>data-form-type</code>
+          attribute set to "<code>phone,email,username</code>" and the second
+          one to "<code>password</code>".</p>
+      </div>
+      <h2 class="heading settled" data-level="1" id="references"><a id="mozTocId985957"
+          class="mozTocH2"></a><span class="secno">A.</span> References </h2>
+      <h3 class="heading settled" data-level="2" id="normative-references"><a id="mozTocId856844"
+          class="mozTocH3"></a><span class="secno">A.1.</span> Normative
+        references </h3>
+      <dl>
+        <dt id="biblio-html">[html]</dt>
+        <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML
+            Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a></dd>
+        <dt id="biblio-wai-aria-11">[WAI-ARIA-1.1]</dt>
+        <dd>Joanmarie Diggs; Shane McCarron; Michael Cooper; Richard
+          Schwerdfeger; James Craig. 14 December 2017. W3C Recommendation. URL:
+          <a href="https://www.w3.org/TR/wai-aria-1.1/">https://www.w3.org/TR/wai-aria-1.1/</a></dd>
+      </dl>
+      <h3 class="heading settled" data-level="2" id="informative-references"><a
+          id="mozTocId710169" class="mozTocH3"></a><span class="secno">A.2.</span>
+        Informative references </h3>
+      <dl>
+        <dt id="biblio-webextensions">[WebExtensions]</dt>
+        <dd><a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions">https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions</a></dd>
+      </dl>
+    </main>
+  </body>
+</html>
