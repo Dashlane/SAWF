@@ -219,7 +219,7 @@ table.light td {
         </a> </p>
       <h1 class="p-name no-ref" id="title">Semantically Annotated Web Forms</h1>
       <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">
-        <time class="dt-updated" datetime="2021-03-31">31 March 2021</time></span></h2>
+          <time class="dt-updated" datetime="2021-03-31">07 April 2021</time></span></h2>
       <details open="">
         <summary>Specification Metadata</summary>
         <div data-fill-with="spec-metadata">
@@ -805,10 +805,18 @@ href="#biblio-html">[html]</a> specification: the <code>data-form-type</code>
         <li>the <strong><code>bank_account</code></strong> extra value
           represents information about a bank account</li>
         <ul>
-          <li>use the secondary extra value <code><strong>part</strong></code>
-            to indicate the bank code part of a bank account number</li>
+          <li>use the secondary extra value bank_code to indicate the bank code
+            part of a bank account</li>
+          <ul>
+            <li>use the secondary extra value <code><strong>part</strong></code>
+              if the bank code is divided in several parts (for instance in the
+              case of bank identifier followed by a branch code)</li>
+          </ul>
           <li>use the secondary extra value <strong><code>number</code></strong>
             to indicate the account number part of a bank account number</li>
+        </ul>
+        <li>the bank_code extra value </li>
+        <ul>
         </ul>
         <li>the <strong><code>bank_name</code></strong> extra value represents
           the human-readable name of the bank or financial organization holding
