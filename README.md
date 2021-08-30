@@ -6,4 +6,6 @@
 
 You can view the document published at https://dashlane.github.io/SAWF/ .
 
+A companion article explaining in details how to use it is available at https://blog.dashlane.com/dashlane-integration-forms/ .
+
 The document is released under [CC BY 4.0 License.](https://creativecommons.org/licenses/by/4.0/)
